@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Button, Card, Modal, Toggle } from '@/Components/ui';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -345,7 +345,7 @@ function MethodFormModal({ show, method, onClose }) {
     });
 
     // Populate data when editing
-    useState(() => {
+    useEffect(() => {
         if (method) {
             setData({
                 name: method.name || '',
@@ -362,8 +362,24 @@ function MethodFormModal({ show, method, onClose }) {
                 sort_order: method.sort_order ?? 0,
                 _method: 'PUT',
             });
+        } else {
+            setData({
+                name: '',
+                slug: '',
+                account_type: 'Personal',
+                account_number: '',
+                account_name: '',
+                branch_name: '',
+                routing_number: '',
+                instruction: '',
+                qr_code: null,
+                qr_code_url: '',
+                enabled: true,
+                sort_order: 0,
+                _method: 'POST',
+            });
         }
-    }, [method]);
+    }, [method, show]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
