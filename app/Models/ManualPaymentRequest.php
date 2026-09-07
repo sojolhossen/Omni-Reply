@@ -50,6 +50,11 @@ class ManualPaymentRequest extends Model
         return $this->belongsTo(ManualPaymentMethod::class, 'manual_payment_method_id');
     }
 
+    public function manualPaymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(ManualPaymentMethod::class, 'manual_payment_method_id');
+    }
+
     public function processedByAdmin(): BelongsTo
     {
         return $this->belongsTo(AdminUser::class, 'processed_by_admin_id');
