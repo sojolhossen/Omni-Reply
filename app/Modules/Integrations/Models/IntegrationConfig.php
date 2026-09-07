@@ -1,0 +1,273 @@
+<?php
+
+namespace App\Modules\Integrations\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class IntegrationConfig extends Model
+{
+    // All valid provider slugs
+    public const PROVIDERS = [
+        'meta_app',
+        'oauth_linkedin',
+        'oauth_twitter',
+        'oauth_youtube',
+        'oauth_tiktok',
+        'oauth_shopify',
+        'oauth_bigcommerce',
+        'llm_openai_default',
+        'llm_anthropic_default',
+        'llm_gemini_default',
+        'llm_nvidia_default',
+        'google_places',
+        'google_workspace',
+        'qdrant',
+        'storage_local',
+        'storage_s3',
+        'storage_do',
+        'storage_wasabi',
+    ];
+
+    /** The single provider slug that is the active storage backend. */
+    public const STORAGE_PROVIDERS = ['storage_local', 'storage_s3', 'storage_do', 'storage_wasabi'];
+
+    /** Maps provider slug → Laravel disk name. */
+    public const STORAGE_DISK_MAP = [
+        'storage_local' => 'public',
+        'storage_s3' => 's3',
+        'storage_do' => 'do_spaces',
+        'storage_wasabi' => 'wasabi',
+    ];
+
+    // Human-readable labels per provider
+    public const LABELS = [
+        'meta_app' => 'Meta App (WhatsApp / Instagram / Messenger / Facebook)',
+        'oauth_linkedin' => 'LinkedIn OAuth',
+        'oauth_twitter' => 'Twitter / X OAuth',
+        'oauth_youtube' => 'YouTube / Google OAuth',
+        'oauth_tiktok' => 'TikTok OAuth',
+        'oauth_shopify' => 'Shopify App (OAuth)',
+        'oauth_bigcommerce' => 'BigCommerce App (OAuth)',
+        'llm_openai_default' => 'OpenAI (Default)',
+        'llm_anthropic_default' => 'Anthropic Claude (Default)',
+        'llm_gemini_default' => 'Google Gemini (Default)',
+        'llm_nvidia_default' => 'NVIDIA NIM (Default)',
+        'google_places' => 'Google Places API',
+        'google_workspace' => 'Google Workspace (Sheets / Docs / Calendar / Meet)',
+        'qdrant' => 'Qdrant Vector Store',
+        'storage_local' => 'Local Storage (server disk)',
+        'storage_s3' => 'Amazon S3',
+        'storage_do' => 'DigitalOcean Spaces',
+        'storage_wasabi' => 'Wasabi Cloud Storage',
+    ];
+
+    // Which category each provider belongs to (for UI grouping)
+    public const CATEGORIES = [
+        'meta_app' => 'Meta',
+        'oauth_linkedin' => 'Social OAuth',
+        'oauth_twitter' => 'Social OAuth',
+        'oauth_youtube' => 'Social OAuth',
+        'oauth_tiktok' => 'Social OAuth',
+        'oauth_shopify' => 'E-Commerce OAuth',
+        'oauth_bigcommerce' => 'E-Commerce OAuth',
+        'llm_openai_default' => 'AI / LLM',
+        'llm_anthropic_default' => 'AI / LLM',
+        'llm_gemini_default' => 'AI / LLM',
+        'llm_nvidia_default' => 'AI / LLM',
+        'google_places' => 'Maps',
+        'google_workspace' => 'Google Workspace',
+        'qdrant' => 'Vector Store',
+        'storage_local' => 'Storage',
+        'storage_s3' => 'Storage',
+        'storage_do' => 'Storage',
+        'storage_wasabi' => 'Storage',
+    ];
+
+    // Field definitions per provider (used to build dynamic forms)
+    public const FIELDS = [
+        'meta_app' => [
+            ['key' => 'app_id',              'label' => 'App ID',                               'type' => 'text',     'required' => true],
+            ['key' => 'app_secret',          'label' => 'App Secret',                           'type' => 'password', 'required' => true],
+            ['key' => 'system_user_token',   'label' => 'System User Access Token',             'type' => 'password', 'required' => false],
+            ['key' => 'verify_token',        'label' => 'Webhook Verify Token',                 'type' => 'text',     'required' => false],
+            ['key' => 'config_id_whatsapp',  'label' => 'Embedded Signup Config ID (WhatsApp)', 'type' => 'text',     'required' => false, 'hint' => 'From Meta App Dashboard → Facebook Login for Business → WhatsApp Embedded Signup configuration'],
+            ['key' => 'config_id_social',    'label' => 'Embedded Signup Config ID (Instagram / Messenger)', 'type' => 'text', 'required' => false, 'hint' => 'From Meta App Dashboard → Facebook Login for Business → Social Embedded Signup configuration'],
+        ],
+        'oauth_linkedin' => [
+            ['key' => 'client_id',     'label' => 'Client ID',     'type' => 'text',     'required' => true],
+            ['key' => 'client_secret', 'label' => 'Client Secret', 'type' => 'password', 'required' => true],
+        ],
+        'oauth_twitter' => [
+            ['key' => 'client_id',     'label' => 'Client ID',     'type' => 'text',     'required' => true],
+            ['key' => 'client_secret', 'label' => 'Client Secret', 'type' => 'password', 'required' => true],
+        ],
+        'oauth_youtube' => [
+            ['key' => 'client_id',     'label' => 'Client ID',     'type' => 'text',     'required' => true],
+            ['key' => 'client_secret', 'label' => 'Client Secret', 'type' => 'password', 'required' => true],
+        ],
+        'oauth_tiktok' => [
+            ['key' => 'client_key',    'label' => 'Client Key',    'type' => 'text',     'required' => true],
+            ['key' => 'client_secret', 'label' => 'Client Secret', 'type' => 'password', 'required' => true],
+        ],
+        'oauth_shopify' => [
+            ['key' => 'client_id',     'label' => 'API Key (Client ID)',        'type' => 'text',     'required' => true,  'hint' => 'From your Shopify Partner app → Client credentials'],
+            ['key' => 'client_secret', 'label' => 'API Secret Key (Client Secret)', 'type' => 'password', 'required' => true],
+        ],
+        'oauth_bigcommerce' => [
+            ['key' => 'client_id',     'label' => 'Client ID',     'type' => 'text',     'required' => true,  'hint' => 'From your BigCommerce Dev Portal app'],
+            ['key' => 'client_secret', 'label' => 'Client Secret', 'type' => 'password', 'required' => true],
+        ],
+        'llm_openai_default' => [
+            ['key' => 'api_key',        'label' => 'API Key',        'type' => 'password', 'required' => true],
+            ['key' => 'organization_id', 'label' => 'Organization ID', 'type' => 'text',     'required' => false],
+            ['key' => 'default_model',   'label' => 'Default Model',   'type' => 'select',   'required' => false, 'hint' => 'Default chat model (e.g. gpt-4o-mini)', 'options' => [
+                ['value' => 'gpt-4o-mini', 'label' => 'GPT-4o Mini (gpt-4o-mini)'],
+                ['value' => 'gpt-4o', 'label' => 'GPT-4o (gpt-4o)'],
+                ['value' => 'gpt-4-turbo', 'label' => 'GPT-4 Turbo (gpt-4-turbo)'],
+                ['value' => 'gpt-3.5-turbo', 'label' => 'GPT-3.5 Turbo (gpt-3.5-turbo)'],
+            ]],
+        ],
+        'llm_anthropic_default' => [
+            ['key' => 'api_key',       'label' => 'API Key',       'type' => 'password', 'required' => true],
+            ['key' => 'default_model', 'label' => 'Default Model', 'type' => 'select',   'required' => false, 'hint' => 'Default chat model (e.g. claude-3-5-sonnet-20241022)', 'options' => [
+                ['value' => 'claude-3-5-sonnet-20241022', 'label' => 'Claude 3.5 Sonnet (claude-3-5-sonnet-20241022)'],
+                ['value' => 'claude-3-haiku-20240307', 'label' => 'Claude 3 Haiku (claude-3-haiku-20240307)'],
+                ['value' => 'claude-3-opus-20240229', 'label' => 'Claude 3 Opus (claude-3-opus-20240229)'],
+            ]],
+        ],
+        'llm_gemini_default' => [
+            ['key' => 'api_key',       'label' => 'API Key',       'type' => 'password', 'required' => true],
+            ['key' => 'default_model', 'label' => 'Default Model', 'type' => 'select',   'required' => false, 'hint' => 'Default chat model (e.g. gemini-1.5-flash)', 'options' => [
+                ['value' => 'gemini-1.5-flash', 'label' => 'Gemini 1.5 Flash (gemini-1.5-flash)'],
+                ['value' => 'gemini-1.5-pro', 'label' => 'Gemini 1.5 Pro (gemini-1.5-pro)'],
+                ['value' => 'gemini-2.0-flash', 'label' => 'Gemini 2.0 Flash (gemini-2.0-flash)'],
+            ]],
+        ],
+        'llm_nvidia_default' => [
+            ['key' => 'api_key',       'label' => 'NVIDIA API Key',        'type' => 'password', 'required' => true,  'hint' => 'From build.nvidia.com (starts with nvapi-...)'],
+            ['key' => 'default_model', 'label' => 'Default Model',         'type' => 'select',   'required' => false, 'hint' => 'Choose a model or select Custom to enter any NVIDIA NIM model', 'options' => [
+                ['value' => 'openai/gpt-oss-20b', 'label' => 'OpenAI GPT-OSS 20B (openai/gpt-oss-20b)'],
+                ['value' => 'meta/llama-3.1-70b-instruct', 'label' => 'Meta Llama 3.1 70B Instruct (meta/llama-3.1-70b-instruct)'],
+                ['value' => 'meta/llama-3.1-8b-instruct', 'label' => 'Meta Llama 3.1 8B Instruct (meta/llama-3.1-8b-instruct)'],
+                ['value' => 'meta/llama-3.3-70b-instruct', 'label' => 'Meta Llama 3.3 70B Instruct (meta/llama-3.3-70b-instruct)'],
+                ['value' => 'deepseek-ai/deepseek-r1', 'label' => 'DeepSeek R1 (deepseek-ai/deepseek-r1)'],
+                ['value' => 'deepseek-ai/deepseek-v3', 'label' => 'DeepSeek V3 (deepseek-ai/deepseek-v3)'],
+                ['value' => 'nvidia/nemotron-4-340b-instruct', 'label' => 'NVIDIA Nemotron-4 340B (nvidia/nemotron-4-340b-instruct)'],
+                ['value' => 'nvidia/llama-3.1-nemotron-70b-instruct', 'label' => 'NVIDIA Llama 3.1 Nemotron 70B (nvidia/llama-3.1-nemotron-70b-instruct)'],
+                ['value' => 'mistralai/mixtral-8x7b-instruct-v0.1', 'label' => 'Mistral Mixtral 8x7B (mistralai/mixtral-8x7b-instruct-v0.1)'],
+                ['value' => 'qwen/qwen2.5-72b-instruct', 'label' => 'Qwen 2.5 72B (qwen/qwen2.5-72b-instruct)'],
+            ]],
+            ['key' => 'base_url',      'label' => 'Base URL (Optional)',   'type' => 'text',     'required' => false, 'hint' => 'Default: https://integrate.api.nvidia.com/v1'],
+        ],
+        'google_places' => [
+            ['key' => 'api_key', 'label' => 'API Key', 'type' => 'password', 'required' => true],
+        ],
+        'google_workspace' => [
+            ['key' => 'client_id',     'label' => 'OAuth Client ID',     'type' => 'text',     'required' => true,  'hint' => 'Google Cloud Console → APIs & Services → Credentials → OAuth client (Web).'],
+            ['key' => 'client_secret', 'label' => 'OAuth Client Secret', 'type' => 'password', 'required' => true],
+            ['key' => 'refresh_token', 'label' => 'Refresh Token',       'type' => 'password', 'required' => true,  'hint' => 'Offline-access refresh token with Sheets, Docs, Drive, Calendar & Forms scopes (e.g. via the OAuth Playground).'],
+        ],
+        'qdrant' => [
+            ['key' => 'url',     'label' => 'Qdrant URL',   'type' => 'text',     'required' => true],
+            ['key' => 'api_key', 'label' => 'API Key',       'type' => 'password', 'required' => false],
+        ],
+
+        'storage_local' => [
+            // No credentials required — uses server disk
+        ],
+
+        'storage_s3' => [
+            ['key' => 'key',                    'label' => 'Access Key ID',          'type' => 'text',     'required' => true],
+            ['key' => 'secret',                 'label' => 'Secret Access Key',      'type' => 'password', 'required' => true],
+            ['key' => 'region',                 'label' => 'Region',                 'type' => 'text',     'required' => true],
+            ['key' => 'bucket',                 'label' => 'Bucket Name',            'type' => 'text',     'required' => true],
+            ['key' => 'url',                    'label' => 'Custom URL (optional)',   'type' => 'text',     'required' => false],
+            ['key' => 'directory_prefix',       'label' => 'Directory Prefix',       'type' => 'text',     'required' => false],
+        ],
+
+        'storage_do' => [
+            ['key' => 'key',                    'label' => 'Spaces Access Key',      'type' => 'text',     'required' => true],
+            ['key' => 'secret',                 'label' => 'Spaces Secret Key',      'type' => 'password', 'required' => true],
+            ['key' => 'region',                 'label' => 'Region (e.g. nyc3)',     'type' => 'text',     'required' => true],
+            ['key' => 'bucket',                 'label' => 'Space Name (bucket)',    'type' => 'text',     'required' => true],
+            ['key' => 'endpoint',               'label' => 'Endpoint URL',           'type' => 'text',     'required' => true],
+            ['key' => 'url',                    'label' => 'CDN / Custom URL',       'type' => 'text',     'required' => false],
+            ['key' => 'directory_prefix',       'label' => 'Directory Prefix',       'type' => 'text',     'required' => false],
+        ],
+
+        'storage_wasabi' => [
+            ['key' => 'key',                    'label' => 'Access Key ID',          'type' => 'text',     'required' => true],
+            ['key' => 'secret',                 'label' => 'Secret Access Key',      'type' => 'password', 'required' => true],
+            ['key' => 'region',                 'label' => 'Region (e.g. us-east-1)', 'type' => 'text',     'required' => true],
+            ['key' => 'bucket',                 'label' => 'Bucket Name',            'type' => 'text',     'required' => true],
+            ['key' => 'endpoint',               'label' => 'Endpoint URL',           'type' => 'text',     'required' => true],
+            ['key' => 'url',                    'label' => 'Custom URL (optional)',   'type' => 'text',     'required' => false],
+            ['key' => 'directory_prefix',       'label' => 'Directory Prefix',       'type' => 'text',     'required' => false],
+        ],
+    ];
+
+    protected $fillable = [
+        'provider',
+        'label',
+        'mode',
+        'enabled',
+        'is_default',
+        'credentials',
+        'webhook_secret',
+        'meta_json',
+        'updated_by_admin_id',
+        'last_tested_at',
+        'last_test_status',
+        'last_test_message',
+    ];
+
+    protected $hidden = ['credentials', 'webhook_secret'];
+
+    protected function casts(): array
+    {
+        return [
+            'enabled' => 'boolean',
+            'is_default' => 'boolean',
+            'credentials' => 'encrypted:array',
+            'webhook_secret' => 'encrypted',
+            'meta_json' => 'array',
+            'last_tested_at' => 'datetime',
+        ];
+    }
+
+    public static function forProvider(string $provider, string $mode = 'live'): ?self
+    {
+        return static::where('provider', $provider)->where('mode', $mode)->first();
+    }
+
+    public function isConfigured(): bool
+    {
+        // Local storage needs no credentials — it is always considered configured
+        if ($this->provider === 'storage_local') {
+            return true;
+        }
+
+        $creds = $this->credentials ?? [];
+
+        return ! empty($creds) && collect($creds)->filter()->isNotEmpty();
+    }
+
+    /** Returns credentials with password-type fields masked — preserving non-sensitive fields. */
+    public function maskedCredentials(): array
+    {
+        $creds = $this->credentials ?? [];
+        $fields = static::FIELDS[$this->provider] ?? [];
+        $passwordKeys = collect($fields)->where('type', 'password')->pluck('key')->all();
+
+        $result = [];
+        foreach ($creds as $k => $v) {
+            if (in_array($k, $passwordKeys, true)) {
+                $result[$k] = (string) $v === '' ? '' : '••••••••••••';
+            } else {
+                $result[$k] = (string) $v;
+            }
+        }
+
+        return $result;
+    }
+}
