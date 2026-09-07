@@ -105,12 +105,14 @@ function ChangePlanModal({ subscription, plans, onClose }) {
     );
 }
 
-export default function SubscriptionShow({ subscription, canCancel, canUpgrade, plans = [], transactions = [] }) {
+export default function SubscriptionShow({ subscription, canCancel, canUpgrade, plans = [], transactions = [], manual_requests = [] }) {
     const { t } = useTranslation();
     const { flash, timezone } = usePage().props;
     const userTz = timezone || 'Asia/Dhaka';
     const formatDate = (iso) => formatDateTz(iso, userTz);
     const [showChangePlan, setShowChangePlan] = useState(false);
+
+    const pendingManual = manual_requests?.filter(r => r.status === 'pending') || [];
 
     const handleCancel = () => {
         if (!confirm(t('client.cancel_subscription_confirm') || 'Are you sure you want to cancel your subscription?')) return;
@@ -138,6 +140,23 @@ export default function SubscriptionShow({ subscription, canCancel, canUpgrade, 
                 {flash?.error && (
                     <div className="rounded-lg bg-coral-50 dark:bg-coral-900/20 text-coral-800 dark:text-coral-200 px-4 py-3 text-sm">
                         {flash.error}
+                    </div>
+                )}
+
+                {pendingManual.length > 0 && (
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-200 flex items-center justify-between gap-4">
+                        <div>
+                            <p className="font-semibold">Payment verification under review ({pendingManual.length})</p>
+                            <p className="text-xs text-amber-700/80 dark:text-amber-300/80 mt-0.5">
+                                Your manual payment submission for {pendingManual[0].plan?.name} (TrxID: {pendingManual[0].transaction_id}) is being verified by admin.
+                            </p>
+                        </div>
+                        <Link
+                            href={route('client.billing.index')}
+                            className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs transition"
+                        >
+                            View Details
+                        </Link>
                     </div>
                 )}
 

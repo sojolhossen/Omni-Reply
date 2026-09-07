@@ -45,6 +45,7 @@ Route::middleware(['verified'])->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/manual/{plan}', [ClientManualCheckoutController::class, 'show'])->name('checkout.manual');
     Route::post('/checkout/manual/submit', [ClientManualCheckoutController::class, 'submit'])->name('checkout.manual.submit');
+    Route::get('/checkout/manual/receipt/{manualRequest}', [ClientManualCheckoutController::class, 'receipt'])->name('checkout.manual.receipt');
 
     // Team management (client admins only)
     Route::get('/team', [TeamController::class, 'index'])->name('team.index');

@@ -47,7 +47,11 @@ class ManualPaymentRequest extends Model
             return $this->receipt_path;
         }
 
-        return route('admin.payments.manual-requests.receipt', $this->id);
+        if (request()?->is('admin/*') || request()?->routeIs('admin.*')) {
+            return route('admin.payments.manual-requests.receipt', $this->id);
+        }
+
+        return route('client.checkout.manual.receipt', $this->id);
     }
 
     public function user(): BelongsTo

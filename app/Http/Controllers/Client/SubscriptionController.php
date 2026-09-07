@@ -91,12 +91,19 @@ class SubscriptionController extends Controller
                 'invoice_url' => $t->invoice_path ? route('client.subscription.invoice', $t->id) : null,
             ]);
 
+        $manualRequests = \App\Models\ManualPaymentRequest::where('user_id', $user->id)
+            ->with(['plan:id,name,currency_code'])
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get();
+
         return Inertia::render('client/Subscription/Show', [
             'subscription' => $subscription,
             'canCancel' => $canCancel,
             'canUpgrade' => $canUpgrade,
             'plans' => $plans,
             'transactions' => $transactions,
+            'manual_requests' => $manualRequests,
         ]);
     }
 

@@ -120,4 +120,30 @@ class ClientManualCheckoutController extends Controller
             __('Your payment submission has been received successfully! Our admin team will verify the transaction and activate your plan shortly.')
         );
     }
+
+    public function receipt(Request $request, ManualPaymentRequest $manualRequest)
+    {
+        $user = $request->user();
+        if (! $user || ($manualRequest->user_id !== $user->id && ! ($user->role === 'admin' || $user->is_super_admin ?? false))) {
+            abort(403, 'Unauthorized access to receipt');
+        }
+
+        $raw = $manualRequest->receipt_path;
+        if (empty($raw)) {
+            abort(404, 'Receipt not found');
+        }
+
+        $clean = preg_replace('#^/?(storage/)?#', '', $raw);
+
+        if (Storage::disk('public')->exists($clean)) {
+            return Storage::disk('public')->response($clean);
+        }
+
+        $basename = basename($raw);
+        if (Storage::disk('public')->exists('manual-receipts/'.$basename)) {
+            return Storage::disk('public')->response('manual-receipts/'.$basename);
+        }
+
+        abort(404, 'Receipt file not found on disk');
+    }
 }

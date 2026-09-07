@@ -288,6 +288,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PaymentTransaction::class);
     }
 
+    public function manualPaymentRequests(): HasMany
+    {
+        return $this->hasMany(ManualPaymentRequest::class);
+    }
+
     /**
      * Check if a user wants to receive a given notification event on a given channel.
      */
