@@ -72,6 +72,7 @@ Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('s
 Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index')->middleware('permission:view_payment_gateways');
 Route::post('/payments/{transaction}/refund', [TransactionController::class, 'refund'])->name('payments.refund')->middleware('permission:view_payment_gateways');
 Route::get('/payments/manual-requests', [AdminManualPaymentRequestController::class, 'index'])->name('payments.manual-requests.index')->middleware('permission:view_payment_gateways');
+Route::get('/payments/manual-requests/{manualRequest}/receipt', [AdminManualPaymentRequestController::class, 'receipt'])->name('payments.manual-requests.receipt')->middleware('permission:view_payment_gateways');
 Route::match(['post', 'put'], '/payments/manual-requests/{manualRequest}/approve', [AdminManualPaymentRequestController::class, 'approve'])->name('payments.manual-requests.approve')->middleware('permission:manage_payment_gateways');
 Route::match(['post', 'put'], '/payments/manual-requests/{manualRequest}/reject', [AdminManualPaymentRequestController::class, 'reject'])->name('payments.manual-requests.reject')->middleware('permission:manage_payment_gateways');
 Route::get('/payment-gateways', [PaymentGatewayConfigController::class, 'index'])->name('payment-gateways.index')->middleware('permission:view_payment_gateways');

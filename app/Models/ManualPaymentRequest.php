@@ -26,6 +26,8 @@ class ManualPaymentRequest extends Model
         'rejected_at',
     ];
 
+    protected $appends = ['receipt_url'];
+
     protected function casts(): array
     {
         return [
@@ -33,6 +35,19 @@ class ManualPaymentRequest extends Model
             'approved_at' => 'datetime',
             'rejected_at' => 'datetime',
         ];
+    }
+
+    public function getReceiptUrlAttribute(): ?string
+    {
+        if (empty($this->receipt_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->receipt_path, 'http://') || str_starts_with($this->receipt_path, 'https://')) {
+            return $this->receipt_path;
+        }
+
+        return route('admin.payments.manual-requests.receipt', $this->id);
     }
 
     public function user(): BelongsTo

@@ -11,6 +11,7 @@ use App\Models\Subscription;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -171,5 +172,26 @@ class AdminManualPaymentRequestController extends Controller
         ]);
 
         return back()->with('success', __('Manual payment request has been rejected.'));
+    }
+
+    public function receipt(ManualPaymentRequest $manualRequest)
+    {
+        $raw = $manualRequest->receipt_path;
+        if (empty($raw)) {
+            abort(404, 'Receipt not found');
+        }
+
+        $clean = preg_replace('#^/?(storage/)?#', '', $raw);
+
+        if (Storage::disk('public')->exists($clean)) {
+            return Storage::disk('public')->response($clean);
+        }
+
+        $basename = basename($raw);
+        if (Storage::disk('public')->exists('manual-receipts/'.$basename)) {
+            return Storage::disk('public')->response('manual-receipts/'.$basename);
+        }
+
+        abort(404, 'Receipt file not found on disk');
     }
 }

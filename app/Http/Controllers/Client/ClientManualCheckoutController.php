@@ -97,8 +97,7 @@ class ClientManualCheckoutController extends Controller
 
         $receiptPath = null;
         if ($request->hasFile('receipt')) {
-            $path = $request->file('receipt')->store('manual-receipts', 'public');
-            $receiptPath = Storage::url($path);
+            $receiptPath = $request->file('receipt')->store('manual-receipts', 'public');
         }
 
         ManualPaymentRequest::create([

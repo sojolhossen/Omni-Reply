@@ -581,25 +581,40 @@ export default function ManualRequests({ requests, counts = {}, filters = {} }) 
                             </div>
 
                             {/* Receipt Image / PDF */}
-                            {selectedRequest.receipt_path ? (
+                            {(selectedRequest.receipt_url || selectedRequest.receipt_path) ? (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs font-semibold uppercase text-neutral-500">
                                         <span>Attached Receipt / Screenshot</span>
                                         <a
-                                            href={selectedRequest.receipt_path}
+                                            href={selectedRequest.receipt_url || selectedRequest.receipt_path}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="inline-flex items-center gap-1 text-brand-600 hover:underline"
+                                            className="inline-flex items-center gap-1 text-brand-600 hover:underline font-semibold"
                                         >
-                                            <ExternalLink className="w-3.5 h-3.5" /> Open in New Tab
+                                            <ExternalLink className="w-3.5 h-3.5" /> Open / Download File
                                         </a>
                                     </div>
                                     <div className="rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 p-2 flex justify-center max-h-96">
-                                        <img
-                                            src={selectedRequest.receipt_path}
-                                            alt="Receipt Proof"
-                                            className="object-contain max-h-80 rounded-lg"
-                                        />
+                                        {selectedRequest.receipt_path?.toLowerCase().endsWith('.pdf') ? (
+                                            <div className="py-8 text-center">
+                                                <FileText className="w-12 h-12 mx-auto text-red-500 mb-2" />
+                                                <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300">PDF Document Attached</p>
+                                                <a
+                                                    href={selectedRequest.receipt_url || selectedRequest.receipt_path}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="inline-block mt-2 text-xs font-semibold text-brand-600 underline"
+                                                >
+                                                    Click to view PDF in new tab
+                                                </a>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={selectedRequest.receipt_url || selectedRequest.receipt_path}
+                                                alt="Receipt Proof"
+                                                className="object-contain max-h-80 rounded-lg"
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             ) : (
